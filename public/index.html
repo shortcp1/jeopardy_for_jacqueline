@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Game</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Staging Screen -->
+    <div id="staging-screen" class="screen active">
+        <div class="staging-container">
+            <h1 class="jeopardy-title">JEOPARDY FOR JACQUELINE!</h1>
+
+            <div class="staging-section">
+                <h2>Game Settings</h2>
+                <div class="setting">
+                    <label for="timer-slider">Response Time:</label>
+                    <input type="range" id="timer-slider" min="5" max="30" value="15" step="1">
+                    <span id="timer-value">15</span> seconds
+                </div>
+            </div>
+
+            <div class="staging-section">
+                <h2>Jeopardy Round Categories</h2>
+                <div id="jeopardy-categories" class="category-list">
+                    <!-- Categories will be loaded here -->
+                </div>
+                <button id="reroll-jeopardy" class="btn btn-secondary">Re-roll All Categories</button>
+            </div>
+
+            <div class="staging-section">
+                <h2>Double Jeopardy Round Categories</h2>
+                <div id="double-jeopardy-categories" class="category-list">
+                    <!-- Categories will be loaded here -->
+                </div>
+                <button id="reroll-double-jeopardy" class="btn btn-secondary">Re-roll All Categories</button>
+            </div>
+
+            <button id="start-game" class="btn btn-primary">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div class="game-container">
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="player-score">
+                    <div class="player-name">PLAYER 1</div>
+                    <div class="player-amount" id="player1-score">$0</div>
+                    <div class="player-buzzer" id="player1-buzzer">[A]</div>
+                    <button class="btn-small" id="edit-score-1">Edit Score</button>
+                </div>
+                <div class="round-indicator" id="round-indicator">JEOPARDY</div>
+                <div class="player-score">
+                    <div class="player-name">PLAYER 2</div>
+                    <div class="player-amount" id="player2-score">$0</div>
+                    <div class="player-buzzer" id="player2-buzzer">[L]</div>
+                    <button class="btn-small" id="edit-score-2">Edit Score</button>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <button class="btn btn-secondary btn-small" id="toggle-control">Switch Control</button>
+                <span id="control-indicator">Player 1 in control</span>
+            </div>
+
+            <!-- Game Board -->
+            <div id="game-board" class="game-board">
+                <!-- Board will be dynamically generated -->
+            </div>
+
+            <!-- Clue Display -->
+            <div id="clue-display" class="clue-display hidden">
+                <div class="clue-category" id="clue-category"></div>
+                <div class="clue-value" id="clue-value"></div>
+                <div class="clue-text" id="clue-text"></div>
+                <div class="timer-container">
+                    <div class="timer-circle" id="timer-circle">
+                        <span id="timer-countdown">15</span>
+                    </div>
+                </div>
+                <div class="buzzer-status" id="buzzer-status">Press your buzzer!</div>
+                <div class="answer-status hidden" id="answer-status"></div>
+                <button id="skip-question" class="btn btn-secondary skip-btn">Skip Question</button>
+            </div>
+
+            <!-- Daily Double Display -->
+            <div id="daily-double-display" class="daily-double-display hidden">
+                <div class="dd-title">DAILY DOUBLE!</div>
+                <div class="dd-player" id="dd-player"></div>
+                <div class="dd-score">Current Score: $<span id="dd-current-score">0</span></div>
+                <div class="dd-max">Maximum Wager: $<span id="dd-max-wager">0</span></div>
+                <div class="wager-input">
+                    <label for="wager-amount">Enter Wager:</label>
+                    <input type="number" id="wager-amount" min="5" step="1">
+                    <button id="submit-wager" class="btn btn-primary">Submit Wager</button>
+                </div>
+            </div>
+
+            <!-- Final Jeopardy Screen -->
+            <div id="final-jeopardy-display" class="final-jeopardy-display hidden">
+                <div class="fj-title">FINAL JEOPARDY!</div>
+                <div class="fj-category" id="fj-category"></div>
+                <div id="fj-wager-screen" class="fj-screen">
+                    <div class="fj-wagers">
+                        <div class="fj-wager-input">
+                            <h3>Player 1</h3>
+                            <p>Score: $<span id="fj-p1-score">0</span></p>
+                            <input type="number" id="fj-p1-wager" min="0" step="1" placeholder="Enter wager">
+                        </div>
+                        <div class="fj-wager-input">
+                            <h3>Player 2</h3>
+                            <p>Score: $<span id="fj-p2-score">0</span></p>
+                            <input type="number" id="fj-p2-wager" min="0" step="1" placeholder="Enter wager">
+                        </div>
+                    </div>
+                    <button id="fj-submit-wagers" class="btn btn-primary">Submit Wagers</button>
+                </div>
+                <div id="fj-question-screen" class="fj-screen hidden">
+                    <div class="fj-clue" id="fj-clue"></div>
+                    <div class="fj-answer-inputs">
+                        <div class="fj-answer-input">
+                            <h3>Player 1's Answer</h3>
+                            <input type="text" id="fj-p1-answer" placeholder="Type your answer">
+                        </div>
+                        <div class="fj-answer-input">
+                            <h3>Player 2's Answer</h3>
+                            <input type="text" id="fj-p2-answer" placeholder="Type your answer">
+                        </div>
+                    </div>
+                    <button id="fj-submit-answers" class="btn btn-primary">Submit Answers</button>
+                </div>
+                <div id="fj-results-screen" class="fj-screen hidden">
+                    <div class="fj-results-title">FINAL JEOPARDY RESULTS</div>
+                    <div class="fj-correct-answer">
+                        Correct Answer: <span id="fj-correct-answer"></span>
+                    </div>
+                    <div class="fj-player-results">
+                        <div class="fj-player-result">
+                            <h3>Player 1</h3>
+                            <p>Answer: <span id="fj-p1-answer-display"></span></p>
+                            <p class="fj-result-status" id="fj-p1-result"></p>
+                            <p>Wager: $<span id="fj-p1-wager-display"></span></p>
+                            <p>Final Score: $<span id="fj-p1-final-score"></span></p>
+                        </div>
+                        <div class="fj-player-result">
+                            <h3>Player 2</h3>
+                            <p>Answer: <span id="fj-p2-answer-display"></span></p>
+                            <p class="fj-result-status" id="fj-p2-result"></p>
+                            <p>Wager: $<span id="fj-p2-wager-display"></span></p>
+                            <p>Final Score: $<span id="fj-p2-final-score"></span></p>
+                        </div>
+                    </div>
+                    <button id="fj-continue" class="btn btn-primary">Continue to Results</button>
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="game-over-display" class="game-over-display hidden">
+                <div class="go-title">GAME OVER!</div>
+                <div class="go-winner" id="go-winner"></div>
+                <div class="go-scores">
+                    <div class="go-score">
+                        <div>Player 1</div>
+                        <div id="go-p1-score">$0</div>
+                    </div>
+                    <div class="go-score">
+                        <div>Player 2</div>
+                        <div id="go-p2-score">$0</div>
+                    </div>
+                </div>
+                <button id="play-again" class="btn btn-primary">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/speechService.js"></script>
+    <script src="/js/game.js"></script>
+    <script src="/js/ui.js"></script>
+</body>
+</html>

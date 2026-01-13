@@ -1,0 +1,19 @@
+{
+  "name": "jeopardy-game",
+  "version": "1.0.0",
+  "description": "Two-player Jeopardy game with speech input and LLM answer validation",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "keywords": ["jeopardy", "game", "speech-recognition"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5"
+  }
+}
