@@ -416,6 +416,12 @@ const game = {
     this.finalJeopardyAnswers = {};
     this.finalJeopardyUserAnswers = {};
 
+    // Mark Final Jeopardy question as used
+    if (this.gameBoard.finalJeopardy.id) {
+      this.usedQuestions.push(this.gameBoard.finalJeopardy.id);
+      console.log(`Marked Final Jeopardy question as used: ${this.gameBoard.finalJeopardy.id}`);
+    }
+
     ui.showFinalJeopardy(
       this.gameBoard.finalJeopardy.category,
       this.players[1].score,
