@@ -78,31 +78,47 @@ const speechService = {
     this.onResultCallback = onResult;
     this.onErrorCallback = onError;
 
-    try {
-      this.recognition.start();
-      this.isListening = true;
-      console.log('Started listening...');
-      return true;
-    } catch (error) {
-      console.error('Error starting speech recognition:', error);
-      return false;
-    }
+    // Attempt to start with retry logic for Web Speech API issues
+    const attemptStart = (retryCount = 0) => {
+      try {
+        this.recognition.start();
+        this.isListening = true;
+        console.log('Started listening...');
+        return true;
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+
+        // Retry up to 3 times with 200ms delay
+        if (retryCount < 3 && error.message && error.message.includes('already')) {
+          console.log(`Retrying speech start (attempt ${retryCount + 1})...`);
+          setTimeout(() => attemptStart(retryCount + 1), 200);
+        } else {
+          if (onError) onError(error);
+        }
+        return false;
+      }
+    };
+
+    return attemptStart();
   },
 
   /**
    * Stop listening for speech input
    */
   stopListening() {
-    if (!this.recognition || !this.isListening) {
+    if (!this.recognition) {
       return;
     }
 
+    // Force stop even if not currently marked as listening (defensive)
     try {
       this.recognition.stop();
       this.isListening = false;
       console.log('Stopped listening');
     } catch (error) {
-      console.error('Error stopping speech recognition:', error);
+      // Ignore errors from stopping (may already be stopped)
+      console.log('Stop listening (already stopped or error):', error.message);
+      this.isListening = false;
     }
   },
 
