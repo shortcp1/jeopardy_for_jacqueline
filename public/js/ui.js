@@ -71,14 +71,28 @@ const ui = {
 
     // Final Jeopardy events
     document.getElementById('fj-submit-wagers').addEventListener('click', () => {
-      const wager1 = parseInt(document.getElementById('fj-p1-wager').value);
-      const wager2 = parseInt(document.getElementById('fj-p2-wager').value);
+      const wager1 = parseInt(document.getElementById('fj-p1-wager').value) || 0;
+      const wager2 = parseInt(document.getElementById('fj-p2-wager').value) || 0;
+      const maxWager1 = Math.max(0, game.players[1].score);
+      const maxWager2 = Math.max(0, game.players[2].score);
 
-      if (wager1 >= 0 && wager2 >= 0) {
-        game.submitFinalJeopardyWagers(wager1, wager2);
-      } else {
-        alert('Please enter valid wagers for both players');
+      // Validate wagers
+      if (wager1 < 0 || wager2 < 0) {
+        alert('Wagers cannot be negative');
+        return;
       }
+
+      if (wager1 > maxWager1) {
+        alert(`Player 1 cannot wager more than their current score ($${game.players[1].score})`);
+        return;
+      }
+
+      if (wager2 > maxWager2) {
+        alert(`Player 2 cannot wager more than their current score ($${game.players[2].score})`);
+        return;
+      }
+
+      game.submitFinalJeopardyWagers(wager1, wager2);
     });
 
     document.getElementById('fj-submit-answers').addEventListener('click', () => {

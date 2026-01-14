@@ -130,11 +130,36 @@ class QuestionManager {
     const doubleJeopardyQuestions = this.getQuestionsForCategories(doubleJeopardyCategories, 2);
 
     // Place 2 Daily Doubles randomly (different positions)
-    const djDD1 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
-    let djDD2 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
-    while (djDD2 === djDD1) {
-      djDD2 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
+    // Rules: 1) Cannot be in $400 row (valueIndex 1)
+    //        2) Must be in different categories
+    // Indexing: questionIndex = categoryIndex * 5 + valueIndex
+    // Categories 0-5, valueIndex 0-4 (0=$200, 1=$400, 2=$600, 3=$800, 4=$1000)
+
+    // Get valid positions (exclude $400 row where valueIndex === 1)
+    const validPositions = [];
+    for (let i = 0; i < doubleJeopardyQuestions.length; i++) {
+      const valueIndex = i % 5; // Row within category
+      if (valueIndex !== 1) { // Exclude $400 row
+        validPositions.push(i);
+      }
     }
+
+    // Pick first DD from valid positions
+    const djDD1 = validPositions[Math.floor(Math.random() * validPositions.length)];
+    const djDD1Category = Math.floor(djDD1 / 5); // Category index (0-5)
+
+    // Pick second DD from valid positions, ensuring different category
+    let djDD2;
+    let attempts = 0;
+    do {
+      djDD2 = validPositions[Math.floor(Math.random() * validPositions.length)];
+      const djDD2Category = Math.floor(djDD2 / 5);
+      if (djDD2 !== djDD1 && djDD2Category !== djDD1Category) {
+        break;
+      }
+      attempts++;
+    } while (attempts < 100);
+
     doubleJeopardyQuestions[djDD1].isDailyDouble = true;
     doubleJeopardyQuestions[djDD2].isDailyDouble = true;
 

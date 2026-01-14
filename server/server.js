@@ -84,11 +84,29 @@ app.post('/api/game/custom', (req, res) => {
     const jeopardyDD = Math.floor(Math.random() * jeopardyQuestions.length);
     jeopardyQuestions[jeopardyDD].isDailyDouble = true;
 
-    const djDD1 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
-    let djDD2 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
-    while (djDD2 === djDD1) {
-      djDD2 = Math.floor(Math.random() * doubleJeopardyQuestions.length);
+    // Place 2 DDs in Double Jeopardy: different categories, not in $400 row
+    const validPositions = [];
+    for (let i = 0; i < doubleJeopardyQuestions.length; i++) {
+      const valueIndex = i % 5; // Row within category
+      if (valueIndex !== 1) { // Exclude $400 row
+        validPositions.push(i);
+      }
     }
+
+    const djDD1 = validPositions[Math.floor(Math.random() * validPositions.length)];
+    const djDD1Category = Math.floor(djDD1 / 5);
+
+    let djDD2;
+    let attempts = 0;
+    do {
+      djDD2 = validPositions[Math.floor(Math.random() * validPositions.length)];
+      const djDD2Category = Math.floor(djDD2 / 5);
+      if (djDD2 !== djDD1 && djDD2Category !== djDD1Category) {
+        break;
+      }
+      attempts++;
+    } while (attempts < 100);
+
     doubleJeopardyQuestions[djDD1].isDailyDouble = true;
     doubleJeopardyQuestions[djDD2].isDailyDouble = true;
 

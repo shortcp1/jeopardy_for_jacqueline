@@ -16,8 +16,8 @@
                 <h2>Game Settings</h2>
                 <div class="setting">
                     <label for="timer-slider">Response Time:</label>
-                    <input type="range" id="timer-slider" min="5" max="30" value="15" step="1">
-                    <span id="timer-value">15</span> seconds
+                    <input type="range" id="timer-slider" min="5" max="30" value="10" step="1">
+                    <span id="timer-value">10</span> seconds
                 </div>
             </div>
 
@@ -121,6 +121,11 @@
                 </div>
                 <div id="fj-question-screen" class="fj-screen hidden">
                     <div class="fj-clue" id="fj-clue"></div>
+                    <div class="fj-timer-container">
+                        <div class="fj-timer-circle" id="fj-timer-circle">
+                            <span id="fj-timer-countdown">30</span>
+                        </div>
+                    </div>
                     <div class="fj-answer-inputs">
                         <div class="fj-answer-input">
                             <h3>Player 1's Answer</h3>

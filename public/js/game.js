@@ -21,7 +21,7 @@ const game = {
   playersWhoAnswered: [],
 
   // Timer settings
-  responseTime: 15,
+  responseTime: 10,
   timerInterval: null,
   remainingTime: 0,
 
@@ -39,6 +39,8 @@ const game = {
   finalJeopardyWagers: {},
   finalJeopardyAnswers: {},
   finalJeopardyUserAnswers: {},
+  finalJeopardyTimerInterval: null,
+  finalJeopardyTimeRemaining: 0,
 
   // API base URL
   apiUrl: window.location.origin,
@@ -379,9 +381,19 @@ const game = {
     if (this.currentRound === 'jeopardy') {
       // Move to Double Jeopardy
       this.currentRound = 'double-jeopardy';
+
+      // Player with lowest score goes first in Double Jeopardy
+      if (this.players[1].score < this.players[2].score) {
+        this.playerInControl = 1;
+      } else if (this.players[2].score < this.players[1].score) {
+        this.playerInControl = 2;
+      }
+      // If tied, keep current control
+
       ui.renderBoard(this.gameBoard.doubleJeopardy, 'double-jeopardy');
       ui.setRoundIndicator('DOUBLE JEOPARDY FOR JACQUELINE!');
-      console.log('Advanced to Double Jeopardy');
+      ui.updateControlIndicator(this.playerInControl);
+      console.log(`Advanced to Double Jeopardy. Player ${this.playerInControl} in control (lowest score)`);
     } else if (this.currentRound === 'double-jeopardy') {
       // Move to Final Jeopardy
       this.currentRound = 'final-jeopardy';
@@ -409,14 +421,83 @@ const game = {
    * Submit Final Jeopardy wagers
    */
   submitFinalJeopardyWagers(wager1, wager2) {
+    console.log(`=== SUBMITTING FINAL JEOPARDY WAGERS ===`);
+    console.log(`Player 1 wager: ${wager1}, current score: ${this.players[1].score}`);
+    console.log(`Player 2 wager: ${wager2}, current score: ${this.players[2].score}`);
     this.finalJeopardyWagers = { 1: wager1, 2: wager2 };
     ui.showFinalJeopardyQuestion(this.gameBoard.finalJeopardy.answer);
+    this.startFinalJeopardyTimer();
+  },
+
+  /**
+   * Start Final Jeopardy 30-second timer
+   */
+  startFinalJeopardyTimer() {
+    this.finalJeopardyTimeRemaining = 30;
+    this.updateFinalJeopardyTimer();
+
+    this.finalJeopardyTimerInterval = setInterval(() => {
+      if (this.finalJeopardyTimeRemaining <= 0) {
+        this.stopFinalJeopardyTimer();
+        this.handleFinalJeopardyTimerExpire();
+        return;
+      }
+
+      this.finalJeopardyTimeRemaining--;
+      this.updateFinalJeopardyTimer();
+    }, 1000);
+  },
+
+  /**
+   * Stop Final Jeopardy timer
+   */
+  stopFinalJeopardyTimer() {
+    if (this.finalJeopardyTimerInterval) {
+      clearInterval(this.finalJeopardyTimerInterval);
+      this.finalJeopardyTimerInterval = null;
+    }
+  },
+
+  /**
+   * Update Final Jeopardy timer display
+   */
+  updateFinalJeopardyTimer() {
+    const timerCountdown = document.getElementById('fj-timer-countdown');
+    const timerCircle = document.getElementById('fj-timer-circle');
+
+    if (!timerCountdown || !timerCircle) return;
+
+    timerCountdown.textContent = this.finalJeopardyTimeRemaining;
+
+    // Change color based on remaining time
+    timerCircle.classList.remove('warning', 'danger');
+
+    if (this.finalJeopardyTimeRemaining <= 10) {
+      timerCircle.classList.add('danger');
+    } else if (this.finalJeopardyTimeRemaining <= 15) {
+      timerCircle.classList.add('warning');
+    }
+  },
+
+  /**
+   * Handle Final Jeopardy timer expiration (auto-submit)
+   */
+  handleFinalJeopardyTimerExpire() {
+    const answer1 = document.getElementById('fj-p1-answer').value.trim();
+    const answer2 = document.getElementById('fj-p2-answer').value.trim();
+
+    // Auto-submit with whatever answers are entered (empty strings if none)
+    console.log('Final Jeopardy timer expired, auto-submitting answers');
+    this.submitFinalJeopardyAnswers(answer1 || '', answer2 || '');
   },
 
   /**
    * Submit Final Jeopardy answers (text input)
    */
   async submitFinalJeopardyAnswers(answer1, answer2) {
+    // Stop the timer
+    this.stopFinalJeopardyTimer();
+
     // Store user answers
     this.finalJeopardyUserAnswers = { 1: answer1, 2: answer2 };
 
@@ -464,16 +545,21 @@ const game = {
    * Calculate Final Jeopardy scores
    */
   calculateFinalJeopardyScores() {
+    console.log('=== CALCULATING FINAL JEOPARDY SCORES ===');
     // Adjust scores based on wagers and correctness
     for (let player = 1; player <= 2; player++) {
       const wager = this.finalJeopardyWagers[player];
       const correct = this.finalJeopardyAnswers[player];
+      const scoreBefore = this.players[player].score;
 
       if (correct) {
         this.players[player].score += wager;
       } else {
         this.players[player].score -= wager;
       }
+
+      const scoreAfter = this.players[player].score;
+      console.log(`Player ${player}: Score ${scoreBefore} + wager ${wager} (${correct ? 'correct' : 'incorrect'}) = ${scoreAfter}`);
     }
   },
 
