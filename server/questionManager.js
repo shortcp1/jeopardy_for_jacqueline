@@ -92,18 +92,41 @@ class QuestionManager {
   getQuestionsForCategories(categories, round) {
     const result = [];
 
+    // Target values for each round
+    const values = round === 1
+      ? [200, 400, 600, 800, 1000]
+      : [400, 800, 1200, 1600, 2000];
+
     for (const category of categories) {
       const categoryQuestions = this.allQuestions
-        .filter(q => q.category === category)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 5);
+        .filter(q => q.category === category && q.round === round);
 
-      // Map questions to dollar values based on round
-      const values = round === 1
-        ? [200, 400, 600, 800, 1000]
-        : [400, 800, 1200, 1600, 2000];
+      // Try to get questions that match the actual dollar values
+      const selectedQuestions = [];
 
-      categoryQuestions.forEach((q, index) => {
+      for (const targetValue of values) {
+        // Find questions with this specific value
+        const matchingQuestions = categoryQuestions.filter(q =>
+          parseInt(q.clue_value) === targetValue &&
+          !selectedQuestions.includes(q)
+        );
+
+        if (matchingQuestions.length > 0) {
+          // Pick a random question from those that match this value
+          const randomMatch = matchingQuestions[Math.floor(Math.random() * matchingQuestions.length)];
+          selectedQuestions.push(randomMatch);
+        } else {
+          // Fallback: pick any unused question and assign the target value
+          const unusedQuestions = categoryQuestions.filter(q => !selectedQuestions.includes(q));
+          if (unusedQuestions.length > 0) {
+            const randomQuestion = unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
+            selectedQuestions.push(randomQuestion);
+          }
+        }
+      }
+
+      // Add questions to result with their assigned display values
+      selectedQuestions.forEach((q, index) => {
         result.push({
           ...q,
           displayValue: values[index],
