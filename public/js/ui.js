@@ -436,13 +436,18 @@ const ui = {
     document.getElementById('fj-p1-score').textContent = score1;
     document.getElementById('fj-p2-score').textContent = score2;
 
+    // Reset all FJ screens and inputs
     document.getElementById('fj-p1-wager').value = '';
     document.getElementById('fj-p1-wager').max = score1;
     document.getElementById('fj-p2-wager').value = '';
     document.getElementById('fj-p2-wager').max = score2;
+    document.getElementById('fj-p1-answer').value = '';
+    document.getElementById('fj-p2-answer').value = '';
 
+    // Show only the wager screen
     document.getElementById('fj-wager-screen').classList.remove('hidden');
     document.getElementById('fj-question-screen').classList.add('hidden');
+    document.getElementById('fj-results-screen').classList.add('hidden');
 
     this.finalJeopardyDisplay.classList.remove('hidden');
   },

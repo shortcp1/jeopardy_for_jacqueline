@@ -410,6 +410,12 @@ const game = {
       return;
     }
 
+    // Reset FJ state to prevent auto-submit issues
+    this.stopFinalJeopardyTimer();
+    this.finalJeopardyWagers = {};
+    this.finalJeopardyAnswers = {};
+    this.finalJeopardyUserAnswers = {};
+
     ui.showFinalJeopardy(
       this.gameBoard.finalJeopardy.category,
       this.players[1].score,
@@ -433,6 +439,9 @@ const game = {
    * Start Final Jeopardy 30-second timer
    */
   startFinalJeopardyTimer() {
+    // Stop any existing timer first
+    this.stopFinalJeopardyTimer();
+
     this.finalJeopardyTimeRemaining = 30;
     this.updateFinalJeopardyTimer();
 
